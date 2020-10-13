@@ -1,4 +1,5 @@
 module.exports = {
+  plugins: ['~/plugins/request.js'],
   router: {
     // nuxt-link 高亮的类名，精确匹配
     linkExactActiveClass: 'active',
