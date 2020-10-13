@@ -3,17 +3,24 @@
     <div class="container page">
       <div class="row">
         <div class="col-md-6 offset-md-3 col-xs-12">
-          <h1 class="text-xs-center">{{isLogin ? 'Sign in' : 'Sign up'}}</h1>
+          <h1 class="text-xs-center">{{ isLogin ? "Sign in" : "Sign up" }}</h1>
           <p class="text-xs-center">
-            <nuxt-link v-if="isLogin" to="/register">Need an account?</nuxt-link>
+            <nuxt-link v-if="isLogin" to="/register"
+              >Need an account?</nuxt-link
+            >
             <nuxt-link v-else to="/login">Have an account?</nuxt-link>
           </p>
 
           <ul class="error-messages">
-            <li>That email is already taken</li>
+            <!-- <li>That email is already taken</li> -->
+            <template v-for="(messages, field) in errors">
+              <li v-for="(message, index) in messages" :key="index">
+                {{ field }} {{ message }}
+              </li>
+            </template>
           </ul>
 
-          <form>
+          <form @submit.prevent="onSubmit">
             <fieldset class="form-group" v-if="!isLogin">
               <input
                 class="form-control form-control-lg"
@@ -24,8 +31,10 @@
             <fieldset class="form-group">
               <input
                 class="form-control form-control-lg"
-                type="text"
+                type="email"
                 placeholder="Email"
+                v-model="user.email"
+                required
               />
             </fieldset>
             <fieldset class="form-group">
@@ -33,10 +42,12 @@
                 class="form-control form-control-lg"
                 type="password"
                 placeholder="Password"
+                v-model="user.password"
+                required
               />
             </fieldset>
             <button class="btn btn-lg btn-primary pull-xs-right">
-              {{isLogin ? 'Sign in' : 'Sign up'}}
+              {{ isLogin ? "Sign in" : "Sign up" }}
             </button>
           </form>
         </div>
@@ -46,13 +57,40 @@
 </template>
 
 <script>
+import { login } from "@/api/user";
+
 export default {
   name: "LoginIndex",
   computed: {
-    isLogin () {
-      return this.$route.name === 'login'
-    }
-  }
+    isLogin() {
+      return this.$route.name === "login";
+    },
+  },
+  data() {
+    return {
+      user: {
+        email: "",
+        password: "",
+      },
+      errors: {},
+    };
+  },
+  methods: {
+    async onSubmit() {
+      try {
+        const { data } = await login({ user: this.user });
+
+        console.log(data);
+        // TODO: 保存用户的登录状态
+
+        // 跳转到首页
+        this.$router.push("/");
+      } catch (error) {
+        console.dir(error);
+        this.errors = error.response.data.errors;
+      }
+    },
+  },
 };
 </script>
 

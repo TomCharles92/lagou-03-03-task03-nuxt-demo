@@ -1,5 +1,7 @@
 module.exports = {
   router: {
+    // nuxt-link 高亮的类名，精确匹配
+    linkExactActiveClass: 'active',
     extendRoutes(routes, resolve) {
       // 清空路由
       routes.splice(0)
