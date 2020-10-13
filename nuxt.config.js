@@ -1,5 +1,8 @@
 module.exports = {
-  plugins: ['~/plugins/request.js'],
+  plugins: [
+    '~/plugins/request.js',
+    '~/plugins/dayjs.js'
+  ],
   router: {
     // nuxt-link 高亮的类名，精确匹配
     linkExactActiveClass: 'active',

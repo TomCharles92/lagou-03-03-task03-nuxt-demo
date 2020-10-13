@@ -13,25 +13,28 @@
           <div class="feed-toggle">
             <ul class="nav nav-pills outline-active">
               <li v-if="user" class="nav-item">
-                <nuxt-link 
+                <nuxt-link
                   class="nav-link"
                   :class="{ active: tab === 'your_feed' }"
                   :to="{ name: 'home', query: { tab: 'your_feed' } }"
-                >Your Feed</nuxt-link>
+                  >Your Feed</nuxt-link
+                >
               </li>
               <li class="nav-item">
-                <nuxt-link 
+                <nuxt-link
                   class="nav-link"
                   :class="{ active: tab === 'global_feed' }"
                   :to="{ name: 'home', query: { tab: 'global_feed' } }"
-                >Global Feed</nuxt-link>
+                  >Global Feed</nuxt-link
+                >
               </li>
               <li v-if="tag" class="nav-item">
-                <nuxt-link 
+                <nuxt-link
                   class="nav-link"
                   :class="{ active: tab === 'tag' }"
                   :to="{ name: 'home', query: { tab: 'tag' } }"
-                >#{{ tag }}</nuxt-link>
+                  >#{{ tag }}</nuxt-link
+                >
               </li>
             </ul>
           </div>
@@ -59,11 +62,15 @@
                   }"
                   >{{ article.author.username }}</nuxt-link
                 >
-                <span class="date">{{ article.createdAt }}</span>
+                <span class="date">{{
+                  article.createdAt | date("MMM DD, YYYY")
+                }}</span>
               </div>
               <button
                 class="btn btn-outline-primary btn-sm pull-xs-right"
                 :class="{ active: article.favorited }"
+                @click="handleFavorite(article)"
+                :disabled="article.favoriteDisabled"
               >
                 <i class="ion-heart"></i> {{ article.favoritesCount }}
               </button>
@@ -86,7 +93,10 @@
               >
                 <nuxt-link
                   class="page-link"
-                  :to="{ name: 'home', query: { page: item, tag: tag, tab: tab } }"
+                  :to="{
+                    name: 'home',
+                    query: { page: item, tag: tag, tab: tab },
+                  }"
                   >{{ item }}</nuxt-link
                 >
               </li>
@@ -110,14 +120,18 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { getArticles, getFeedArticles } from "@/api/article";
+import {
+  getArticles,
+  getFeedArticles,
+  addFavorite,
+  deleteFavorite,
+} from "@/api/article";
 import { getTags } from "@/api/tag";
 import { mapState } from "vuex";
 
@@ -130,19 +144,18 @@ export default {
     const page = Number.parseInt(query.page || 1);
     const limit = 20;
     const tab = query.tab || "global_feed";
-    const loadArticles = tab === 'your_feed'
-      ? getFeedArticles
-      : getArticles
-    const [ articleRes, tagRes ] = await Promise.all([
-      loadArticles({ 
-        limit, 
+    const loadArticles = tab === "your_feed" ? getFeedArticles : getArticles;
+    const [articleRes, tagRes] = await Promise.all([
+      loadArticles({
+        limit,
         offset: (page - 1) * limit,
-        tag: query.tag
+        tag: query.tag,
       }),
-      getTags()
+      getTags(),
     ]);
     const { articles, articlesCount } = articleRes.data;
     const { tags } = tagRes.data;
+    articles.forEach(article => article.favoriteDisabled = false)
 
     return {
       articles,
@@ -151,14 +164,31 @@ export default {
       limit,
       tags,
       tag: query.tag,
-      tab
+      tab,
     };
   },
   computed: {
     totalPageCount() {
       return Math.ceil(this.articlesCount / this.limit);
     },
-    ...mapState(["user"])
+    ...mapState(["user"]),
+  },
+  methods: {
+    async handleFavorite(article) {
+      article.favoriteDisabled = true;
+      if (article.favorited) {
+        // 取消点赞
+        await addFavorite(article.slug);
+        article.favorited = false;
+        article.favoritesCount -= 1;
+      } else {
+        // 点赞
+        await deleteFavorite(article.slug);
+        article.favorited = true;
+        article.favoritesCount += 1;
+      }
+      article.favoriteDisabled = false;
+    },
   },
 };
 </script>
