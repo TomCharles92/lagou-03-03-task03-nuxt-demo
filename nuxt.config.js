@@ -11,6 +11,7 @@ module.exports = {
           component: resolve(__dirname, 'pages/layout/'),
           children: [
             {
+              name: 'home',
               path: '',
               component: resolve(__dirname, 'pages/home/')
             },
