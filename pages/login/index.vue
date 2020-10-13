@@ -26,6 +26,8 @@
                 class="form-control form-control-lg"
                 type="text"
                 placeholder="Your Name"
+                v-model="user.username"
+                required
               />
             </fieldset>
             <fieldset class="form-group">
@@ -57,10 +59,12 @@
 </template>
 
 <script>
-import { login } from "@/api/user";
+import { login, register } from "@/api/user";
+const Cookie = process.client ? require("js-cookie") : undefined;
 
 export default {
   name: "LoginIndex",
+  middleware: "unAuthenticated",
   computed: {
     isLogin() {
       return this.$route.name === "login";
@@ -69,6 +73,7 @@ export default {
   data() {
     return {
       user: {
+        username: "",
         email: "",
         password: "",
       },
@@ -78,10 +83,13 @@ export default {
   methods: {
     async onSubmit() {
       try {
-        const { data } = await login({ user: this.user });
-
-        console.log(data);
+        const { data } = this.isLogin
+          ? await login({ user: this.user })
+          : await register({ user: this.user });
+        
         // TODO: 保存用户的登录状态
+        this.$store.commit("setUser", data.user);
+        Cookie.set("user", data.user);
 
         // 跳转到首页
         this.$router.push("/");
