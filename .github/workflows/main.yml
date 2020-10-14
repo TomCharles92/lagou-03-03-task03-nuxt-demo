@@ -1,0 +1,64 @@
+name: Publish And Deploy Demo
+on:
+  push:
+    tags:
+      - 'v*' # 发布版本才会触发部署，普通提交不会
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    # 下载源码
+    - name: Checkout
+      uses: actions/checkout@master
+
+    # 打包构建
+    - name: Build
+      uses: actions/setup-node@master
+    - run: npm install
+    - run: npm run build
+    # 将下列文件压缩打包成 release.tgz
+    - run: tar -zcvf release.tgz .nuxt static nuxt.config.js package.json package-lock.json pm2.config.json
+
+    # 发布 Release，将会用到 secrets.TOKEN
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    # 上传构建结果到 Release
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release.tgz
+        asset_name: release.tgz
+        asset_content_type: application/x-tgz
+
+    # 部署到服务器
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+      	# 这些常量在 GitHub 项目的 Secrets 中创建
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        # 一下命令是运行在 Linux 服务器的
+        script: |
+          cd /root/realworld-nuxtjs
+          # 下载之前上传的 Release 发布包
+          wget https://github.com/TomCharles92/lagou-03-03-task04-realworld/releases/latest/download/release.tgz -O release.tgz
+          tar zxvf release.tgz
+          npm install --production
+          pm2 reload pm2.config.json
