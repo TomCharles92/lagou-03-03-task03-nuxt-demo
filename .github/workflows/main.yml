@@ -49,12 +49,10 @@ jobs:
     - name: Deploy
       uses: appleboy/ssh-action@master
       with:
-      	# 这些常量在 GitHub 项目的 Secrets 中创建
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        # 一下命令是运行在 Linux 服务器的
         script: |
           cd /root/realworld-nuxtjs
           # 下载之前上传的 Release 发布包
