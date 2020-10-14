@@ -55,7 +55,6 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd /root/realworld-nuxtjs
-          # 下载之前上传的 Release 发布包
           wget https://github.com/TomCharles92/lagou-03-03-task04-realworld/releases/latest/download/release.tgz -O release.tgz
           tar zxvf release.tgz
           npm install --production
