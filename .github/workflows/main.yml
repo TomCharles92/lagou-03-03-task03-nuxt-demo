@@ -4,7 +4,6 @@ on:
     tags:
       - 'v*' # 发布版本才会触发部署，普通提交不会
 
-# 写个注释
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
