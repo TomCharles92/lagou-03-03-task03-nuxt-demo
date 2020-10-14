@@ -10,9 +10,7 @@
           ></textarea>
         </div>
         <div class="card-footer">
-          <img
-            src="http://i.imgur.com/Qr71crq.jpg"
-            class="comment-author-img"
+          <img :src="article.author.image" class="comment-author-img"
           />
           <button class="btn btn-sm btn-primary">Post Comment</button>
         </div>
@@ -43,6 +41,8 @@
 <script>
 import { getComments } from "@/api/article";
 
+// 方便查看文章评论 slug：minima-qui-i9xszh
+// 我自己添加了评论
 export default {
   name: "ArticleComments",
   props: ["article"],
@@ -51,10 +51,9 @@ export default {
       comments: []
     }
   },
-  async mounted () {
+  async created () {
     const { data } = await getComments(this.article.slug);
     this.comments = data.comments
-    console.log(this.comments);
   }
 }
 </script>

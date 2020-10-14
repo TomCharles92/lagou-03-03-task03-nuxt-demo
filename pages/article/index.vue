@@ -36,10 +36,7 @@ export default {
   middleware: "authenticated",
   components: { ArticleMate, ArticleComments },
   async asyncData({ params }) {
-    const {
-      data: { article },
-    } = await getArticle(params.slug);
-    console.log(article);
+    const { data: { article } } = await getArticle(params.slug);
     const md = new MarkdownIt();
     article.body = md.render(article.body);
     return { article };
