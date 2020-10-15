@@ -34,7 +34,9 @@
             </ul>
           </div>
 
-          <div class="article-preview">
+          <article-preview v-for="article in myArticles" :key="article.slug" :article="article"/>
+
+          <!-- <div class="article-preview">
             <div class="article-meta">
               <a href=""><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
               <div class="info">
@@ -75,7 +77,7 @@
                 <li class="tag-default tag-pill tag-outline">Song</li>
               </ul>
             </a>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -85,10 +87,12 @@
 <script>
 import { getProfile, follow, unfollow } from "@/api/profile";
 import { getArticles } from "@/api/article";
+import ArticlePreview from "@/components/article-preview"
 
 export default {
   name: "ProfileIndex",
   middleware: "authenticated",
+  components: { ArticlePreview },
   async asyncData({ params }) {
     const { data: { profile } } = await getProfile(params.username);
     const { data: { articles: myArticles } } = await getArticles({ author: params.username })

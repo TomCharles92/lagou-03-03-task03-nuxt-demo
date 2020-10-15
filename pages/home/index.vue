@@ -39,7 +39,9 @@
             </ul>
           </div>
 
-          <div
+          <!-- 文章列表 -->
+          <article-preview v-for="article in articles" :key="article.slug" :article="article"/>
+          <!-- <div
             class="article-preview"
             v-for="article in articles"
             :key="article.slug"
@@ -85,7 +87,8 @@
               <p>{{ article.description }}</p>
               <span>Read more...</span>
             </nuxt-link>
-          </div>
+          </div> -->
+          <!-- /文章列表 -->
 
           <!-- 分页 -->
           <nav>
@@ -131,6 +134,7 @@
 </template>
 
 <script>
+import ArticlePreview from "@/components/article-preview"
 import {
   getArticles,
   getFeedArticles,
@@ -142,6 +146,7 @@ import { mapState } from "vuex";
 
 export default {
   name: "HomePage",
+  components: { ArticlePreview },
   // 监听 query 中的 page
   // 然后会触发 asyncData, layout 等方法
   watchQuery: ["page", "tag", "tab"],
@@ -179,21 +184,21 @@ export default {
     ...mapState(["user"]),
   },
   methods: {
-    async handleFavorite(article) {
-      article.favoriteDisabled = true;
-      if (article.favorited) {
-        // 取消点赞
-        await addFavorite(article.slug);
-        article.favorited = false;
-        article.favoritesCount -= 1;
-      } else {
-        // 点赞
-        await deleteFavorite(article.slug);
-        article.favorited = true;
-        article.favoritesCount += 1;
-      }
-      article.favoriteDisabled = false;
-    },
+    // async handleFavorite(article) {
+    //   article.favoriteDisabled = true;
+    //   if (article.favorited) {
+    //     // 取消点赞
+    //     await addFavorite(article.slug);
+    //     article.favorited = false;
+    //     article.favoritesCount -= 1;
+    //   } else {
+    //     // 点赞
+    //     await deleteFavorite(article.slug);
+    //     article.favorited = true;
+    //     article.favoritesCount += 1;
+    //   }
+    //   article.favoriteDisabled = false;
+    // },
   },
 };
 </script>
