@@ -4,15 +4,16 @@
       <div class="container">
         <div class="row">
           <div class="col-xs-12 col-md-10 offset-md-1">
-            <img src="http://i.imgur.com/Qr71crq.jpg" class="user-img" />
-            <h4>Eric Simons</h4>
-            <p>
-              Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda
-              looks like Peeta from the Hunger Games
-            </p>
-            <button class="btn btn-sm btn-outline-secondary action-btn">
+            <img :src="profile.image" class="user-img" />
+            <h4>{{ profile.username }}</h4>
+            <p>{{ profile.bio }}</p>
+            <button
+              class="btn btn-sm btn-outline-secondary action-btn"
+              @click="handleFollow"
+            >
               <i class="ion-plus-round"></i>
-              &nbsp; Follow Eric Simons
+              &nbsp; {{ profile.following ? "Unfollow" : "Follow" }}
+              {{ profile.username }}
             </button>
           </div>
         </div>
@@ -82,9 +83,31 @@
 </template>
 
 <script>
+import { getProfile, follow, unfollow } from "@/api/profile";
+import { getArticles } from "@/api/article";
+
 export default {
   name: "ProfileIndex",
   middleware: "authenticated",
+  async asyncData({ params }) {
+    const { data: { profile } } = await getProfile(params.username);
+    const { data: { articles: myArticles } } = await getArticles({ author: params.username })
+    return { profile, myArticles };
+  },
+  methods: {
+    // 处理关注
+    async handleFollow() {
+      if (this.profile.following) {
+        // 取消关注
+        await unfollow(this.profile.username);
+        this.profile.following = false;
+      } else {
+        // 关注
+        await follow(this.profile.username);
+        this.profile.following = true;
+      }
+    },
+  },
 };
 </script>
 
